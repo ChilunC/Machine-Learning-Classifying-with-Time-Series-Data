@@ -21,13 +21,15 @@ TRAIN_FILES = ["Data/"]
 fold_index = 9;
 trainData = [];
 testData = [];
-lisInd = [1,2,3,4,5,6,7,8,9,10,11];
+DataPCA = [];
+lisInd = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 shuffle(lisInd);
 print(lisInd);
-for inde1 in range(1,fold_index+1):
-    inde = lisInd[inde1]
+for inde1 in range(0, fold_index):
+    inde = lisInd[inde1];
     print("inde train")
     print(inde)
+    print(inde1)
     A_train_path_mar = TRAIN_FILES[0] + "A_TXT/%dAmar.txt" % inde;
     lines2 = np.transpose(np.loadtxt(A_train_path_mar, comments="#", delimiter="\t", unpack=False))
 
@@ -43,6 +45,10 @@ for inde1 in range(1,fold_index+1):
         #samps = 100;
         #print(len(lines2[ind]))
         #print(signal.resample(lines2[ind], samps).shape)
+
+        lines.append(signal.resample(lines2[ind], samps));
+        lines.append(signal.resample(lines3[ind], samps));
+        lines.append(signal.resample(lines4[ind], samps));
 
         #lines.append(np.append(signal.resample(lines2[ind], samps),np.array([1])));
         #plt.figure(1)
@@ -80,6 +86,11 @@ for inde1 in range(1,fold_index+1):
         samps = secs * 75;  # Number of samples to downsample
 
         #samps = 100;
+
+        lines.append(signal.resample(lines2[ind], samps));
+        lines.append(signal.resample(lines3[ind], samps));
+        lines.append(signal.resample(lines4[ind], samps));
+
         #lines.append(np.append(signal.resample(lines2[ind], samps),np.array([0])));
         #plt.figure(1)
         #plt.subplot(211)
@@ -87,7 +98,7 @@ for inde1 in range(1,fold_index+1):
         #plt.subplot(212)
         #plt.plot(lines[-1][:-1])
         #plt.show()
-        lines.append(np.append(signal.resample(lines3[ind], samps),np.array([0])));
+        #lines.append(np.append(signal.resample(lines3[ind], samps),np.array([0])));
         #lines.append(np.append(signal.resample(lines4[ind], samps),np.array([0])));
         #if (len(lines)==0):
         #    lines.append(signal.resample(lines2[ind], samps));
@@ -101,9 +112,10 @@ for inde1 in range(1,fold_index+1):
         #lines[ind] = block_mean(a, 5).shape  # (20, 40)
 
     trainData.append(lines)
+    DataPCA.append(lines)
     #trainData.append(np.transpose(np.load(N_train_path)));
 
-for inde in range(10,12):
+for inde1 in range(9, 11):
     inde = lisInd[inde1]
     #A_test_path = TRAIN_FILES + "A_TXT/%dAmar.txt" % inde;
     #testData.append(np.transpose(np.load(A_test_path)));
@@ -112,6 +124,8 @@ for inde in range(10,12):
     #testData.append(np.transpose(np.load(N_test_path)));
     print("inde test")
     print(inde)
+    print(inde1)
+    #print(len(lisInd))
     A_train_path_mar = TRAIN_FILES[0] + "A_TXT/%dAmar.txt" % inde;
     lines2 = np.transpose(np.loadtxt(A_train_path_mar, comments="#", delimiter="\t", unpack=False))
     A_train_path_pie = TRAIN_FILES[0] + "A_TXT/%dApie.txt" % inde;
@@ -126,9 +140,11 @@ for inde in range(10,12):
         #print(samps);
         #samps = 100;
         #lines2[ind] = signal.resample(lines2[ind],samps);  # Number of samples to downsample
-        #lines.append(signal.resample(lines2[ind], samps));
+
+
+        lines.append(signal.resample(lines2[ind], samps));
         lines.append(signal.resample(lines3[ind], samps));
-        #lines.append(signal.resample(lines4[ind], samps));
+        lines.append(signal.resample(lines4[ind], samps));
         #if (len(lines)==0):
         #    lines.append(signal.resample(lines2[ind], samps));
         #else:
@@ -150,15 +166,15 @@ for inde in range(10,12):
     lines4 = np.transpose(np.loadtxt(N_train_path_sen, comments="#", delimiter="\t", unpack=False))
     #lines = copy.deepcopy(lines2);
     lines = [];
-    for ind,a in enumerate(lines2):
+    for ind, a in enumerate(lines2):
         secs = round(len(lines2[ind]) / 2000.0);  # Number of seconds in signal X
         samps = secs * 75;  # Number of samples to downsample
         #print(samps)
         #samps = 100;
         #lines2[ind] = signal.resample(lines2[ind], samps);
-        #lines.append(signal.resample(lines2[ind], samps));
+        lines.append(signal.resample(lines2[ind], samps));
         lines.append(signal.resample(lines3[ind], samps));
-        #lines.append(signal.resample(lines4[ind], samps));
+        lines.append(signal.resample(lines4[ind], samps));
         #if (len(lines)==0):
         #    lines.append(signal.resample(lines2[ind], samps));
         #else:
@@ -169,10 +185,21 @@ for inde in range(10,12):
         #lines[ind] = block_mean(a, 5).shape  # (20, 40)
 
     testData.append(lines)
+    DataPCA.append(lines)
+    #print(lines)
     #trainData.append(np.transpose(np.load(N_train_path)));
+#print(len(DataPCA))
+#print(len(DataPCA[0]))
+#print(len(DataPCA[0][0]))
+#DataPCA = trainData;
+#DataPCA.append(testData);
 
-classLegs.predict(trainData,testData,5)
+PDa = classLegs.PCA(DataPCA);
+
+classLegs.predict(trainData, testData, 5)
 
 pred = classLegs.get_preds();
 for pre in pred:
     print("Total score for %d " % (pre))
+
+print(PDa)
